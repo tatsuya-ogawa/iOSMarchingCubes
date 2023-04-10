@@ -9,7 +9,7 @@ using namespace metal;
 //----------------------------------------------------------------
 // given two grid nodes, determine vertex where isovalue intercepts edge between them
 //----------------------------------------------------------------
-
+constant float existsFlag = 1.0;
 TableVertex interpolate(TableVertex v1, TableVertex v2, float isoValue) {
     float diff = v2.weight - v1.weight;
     if(diff == 0) return v1;
@@ -18,7 +18,8 @@ TableVertex interpolate(TableVertex v1, TableVertex v2, float isoValue) {
     v.pos = v1.pos + (v2.pos - v1.pos) * diff;
     v.color = v1.color + (v2.color - v1.color) * diff;
     v.normal = normalize( v1.normal + (v2.normal - v1.normal) * diff );
-    v.weight = v1.weight + (v2.weight - v1.weight) * diff;
+    v.weight = existsFlag;//v1.weight + (v2.weight - v1.weight) * diff;
+
     return v;
 }
 
@@ -28,13 +29,14 @@ TableVertex interpolate(TableVertex v1, TableVertex v2, float isoValue) {
 // return -1 if none is found
 //----------------------------------------------------------------
 
-constant float CONSIDERSAME=0.0000001;
+constant float CONSIDERSAME=0.0000000001;
 int indexOfExistingVertex(float3 pos, device TableVertex *vertices, int vCount) {
-//    return -1;
     for(int i=0; i < vCount; ++i) {
-        if(abs(pos.x - vertices[i].pos.x) > CONSIDERSAME) continue;
-        if(abs(pos.y - vertices[i].pos.y) > CONSIDERSAME) continue;
-        if(abs(pos.z - vertices[i].pos.z) > CONSIDERSAME) continue;
+        if(vertices[i].weight < existsFlag) continue;
+        if(distance(pos, vertices[i].pos) > CONSIDERSAME) continue;
+                if(abs(pos.x - vertices[i].pos.x) > CONSIDERSAME) continue;
+                if(abs(pos.y - vertices[i].pos.y) > CONSIDERSAME) continue;
+                if(abs(pos.z - vertices[i].pos.z) > CONSIDERSAME) continue;
         return i;
     }
     return -1;  // 'not in list'
@@ -58,7 +60,6 @@ kernel void computeShader
  uint3 id [[ thread_position_in_grid ]]
  )
 {
-    
     unsigned int GSPAN = cd.GSPAN;
     unsigned int GSPAN2 = GSPAN * GSPAN;    //   Z axis offset
     unsigned int GSPAN3 = GSPAN + GSPAN2;   // Y+Z axis offset
@@ -121,9 +122,9 @@ kernel void computeShader
             vertices[vIndex3] = v3;
         }
         int index = atomic_fetch_add_explicit(&icounter, 3, memory_order_relaxed);
-        indices[index++] = vIndex1;
-        indices[index++] = vIndex2;
-        indices[index++] = vIndex3;
+        indices[index++] = (uint)vIndex1;
+        indices[index++] = (uint)vIndex2;
+        indices[index++] = (uint)vIndex3;
     }
 }
 

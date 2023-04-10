@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "swifteagleply",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tatsuya-ogawa/SwiftEaglePly.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "ef8240e3b290542067ad92229551fe1cbeda5349"
+      }
+    },
+    {
       "identity" : "swiftstanfordbunny",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tatsuya-ogawa/SwiftStanfordBunny.git",

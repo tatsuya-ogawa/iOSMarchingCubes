@@ -14,6 +14,8 @@ class ComputeShader{
         guard let device = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device")
         }
+        grid.update(device: device)
+        
         let library = device.makeDefaultLibrary()
         guard let function = library?.makeFunction(name: "computeShader")else{
             fatalError("library?.makeFunction")
@@ -21,14 +23,16 @@ class ComputeShader{
         let pipelineState = try device.makeComputePipelineState(function: function)
         let commandQueue = device.makeCommandQueue()
         let commandBuffer = commandQueue?.makeCommandBuffer()
-        let commandEncoder = commandBuffer?.makeComputeCommandEncoder()
-        
-        commandEncoder?.setComputePipelineState(pipelineState)
-        grid.update(device: device)
-        for (index,buffer) in grid.buffers.enumerated(){
-            commandEncoder?.setBuffer(buffer, offset: 0, index: index)
+        if let blitCommandEncoder = commandBuffer?.makeBlitCommandEncoder() {
+            grid.clear(blitCommandEncoder: blitCommandEncoder)
+            blitCommandEncoder.endEncoding()
         }
         
+        let commandEncoder = commandBuffer?.makeComputeCommandEncoder()
+        commandEncoder?.setComputePipelineState(pipelineState)
+        for (index,buffer) in grid.buffers.enumerated(){
+            commandEncoder?.setBuffer(buffer, offset: 0, index: index)
+        }        
         let threadSize = 8
         let threadGroupSize = MTLSize(width: threadSize, height: threadSize, depth: threadSize)
         let gridSize = MTLSize(width: (grid.gridSize + threadSize-1) / threadSize, height: (grid.gridSize + threadSize-1) / threadSize, depth: (grid.gridSize + threadSize-1) / threadSize)
