@@ -16,7 +16,7 @@ TableVertex interpolate(TableVertex v1, TableVertex v2, float isoValue) {
     diff = (isoValue - v1.weight) / diff;
     TableVertex v;
     v.pos = v1.pos + (v2.pos - v1.pos) * diff;
-    v.color = v1.color + (v2.color - v1.color) * diff;
+    v.color = float4(1.0,0,0,1.0) ;//(v1.color + (v2.color - v1.color) * diff).xyz;
     v.normal = normalize( v1.normal + (v2.normal - v1.normal) * diff );
     v.weight = existsFlag;//v1.weight + (v2.weight - v1.weight) * diff;
 

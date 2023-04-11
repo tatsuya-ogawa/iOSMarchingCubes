@@ -29,7 +29,7 @@ class ViewController: UIViewController {
     func compute(){
         let model = SwiftStanfordBunny<ModelPoint>.instance()
         let points = try! model.load()
-        grid = Grid(inputs:points)
+        grid = Grid(inputs:points,dimensions: SIMD3<Int>(50,50,50))
         if let grid = grid{
             let computeShader = ComputeShader()
             try! computeShader.run(grid: grid)

@@ -16,34 +16,52 @@ public protocol GridInput{
 }
 class Grid{
     let maxVertexPerGrid = 12
-    let gridSize:Int=50
-    let isoValue:Float = 0.5
+    let dimensions:SIMD3<Int>
+    let isoValue:Float = 0.4
     var points:[TableVertex] = []
     var scale:SIMD3<Float> = SIMD3<Float>.zero
     var corner:(min:SIMD3<Float>,max:SIMD3<Float>) = (min:SIMD3<Float>(Float.greatestFiniteMagnitude,Float.greatestFiniteMagnitude,Float.greatestFiniteMagnitude),max:SIMD3<Float>(Float.leastNormalMagnitude,Float.leastNormalMagnitude,Float.leastNormalMagnitude))
-    init(inputs:[GridInput]){
+    init(inputs:[GridInput],dimensions:SIMD3<Int>){
+        self.dimensions = dimensions
         corner = inputs.reduce(corner){ (tuple,item) in
             let min = SIMD3<Float>(min(item.pos.x,tuple.min.x),min(item.pos.y,tuple.min.y),min(item.pos.z,tuple.min.z))
             let max = SIMD3<Float>(max(item.pos.x,tuple.max.x),max(item.pos.y,tuple.max.y),max(item.pos.z,tuple.max.z))
             return (min:min,max:max)
         }
-        scale = (corner.max - corner.min) / Float(gridSize-1)
-        points = (0..<self.gridSize).flatMap{z in
-            (0..<self.gridSize).flatMap{y in
-                (0..<self.gridSize).map{x in
+        scale = (corner.max - corner.min) / SIMD3<Float>(Float(dimensions.x-1),Float(dimensions.y-1),Float(dimensions.z-1))
+        points = (0..<dimensions.z).flatMap{z in
+            (0..<self.dimensions.y).flatMap{y in
+                (0..<self.dimensions.x).map{x in
                     let pos = corner.min + SIMD3<Float>(scale.x*Float(x),scale.y*Float(y),scale.z*Float(z))
-//                    let pos = corner.min + SIMD3<Float>(Float(x),Float(y),Float(z))
+                    //                    let weight:Float = x == 0 || x == dimensions.x - 1
+                    //                    || y == 0 || y == dimensions.x - 1
+                    //                    || z == 0 || z == dimensions.z - 1
+                    //                    ? 0 : 1
                     return TableVertex(pos: pos, normal: SIMD3<Float>.zero, color: SIMD4<Float>.zero, weight: 0)
                 }
             }
         }
-                for input in inputs {
-                    let gridOffset = (input.pos - corner.min)/scale
-                    let indice = Int(gridOffset.x) + Int(gridOffset.y)*Int(gridSize) + Int(gridOffset.z)*Int(gridSize)*Int(gridSize)
-                    points[indice].weight = 1.0
-                    points[indice].normal = input.normal
-                    points[indice].color = SIMD4<Float>(0,0,0,1)
+        for input in inputs {
+            let gridOffset = (input.pos - corner.min)/scale
+            for i in -1...1 {
+                for j in -1...1 {
+                    for k in -1...1 {
+                        let x:Int = Int(gridOffset.x)+k
+                        let y:Int = Int(gridOffset.y)+j
+                        let z:Int = Int(gridOffset.z)+i
+                        if 0..<dimensions.x ~= x && 0..<dimensions.y ~= y && 0..<dimensions.z ~= z  {
+                            let indice = x + y*dimensions.x + z*dimensions.x*dimensions.y
+                            let distance=simd_distance(input.pos/scale,points[indice].pos/scale+SIMD3<Float>(Float(k),Float(j),Float(i))) / sqrtf(3)
+                            if points[indice].weight < 1-distance {
+                                points[indice].weight = 1-distance
+                                points[indice].normal = input.normal
+                                points[indice].color = SIMD4<Float>(1,0,0,1)
+                            }
+                        }
+                    }
                 }
+            }
+        }
     }
     var buffers:[MTLBuffer] {
         get {
@@ -61,7 +79,7 @@ class Grid{
     }
     func update(device:MTLDevice){
         gridBuffer = device.makeBuffer(bytes: self.points, length: self.points.count * MemoryLayout<TableVertex>.size, options: [])
-        var control = MarchingCubeControl(isoValue: self.isoValue, GSPAN: UInt32(self.gridSize))
+        var control = MarchingCubeControl(isoValue: self.isoValue, GSPAN: UInt32(self.dimensions.x))
         controlBuffer = device.makeBuffer(bytes: &control, length: MemoryLayout<MarchingCubeControl>.size, options: [])
         verticesBuffer = device.makeBuffer(length: self.points.count * MemoryLayout<TableVertex>.size * maxVertexPerGrid, options: [.storageModeShared])
         var vCounter:Int32 = 0
@@ -90,7 +108,7 @@ class Grid{
             indexType: .uInt32,
             geometryType: .triangles,
             material: nil
-        )        
+        )
         let vertexDescriptor = MDLVertexDescriptor()
         let positionAttribute = MDLVertexAttribute(
             name: MDLVertexAttributePosition,
@@ -112,7 +130,7 @@ class Grid{
         )
         vertexDescriptor.attributes = [positionAttribute,normalAttribute,colorAttribute]
         vertexDescriptor.layouts = [MDLVertexBufferLayout(stride: MemoryLayout<TableVertex>.stride)]
-
+        
         let verticesBuffer = allocator.newBuffer(
             with: Data(bytes: vertices, count: vertices.count * MemoryLayout<TableVertex>.stride),
             type: .vertex

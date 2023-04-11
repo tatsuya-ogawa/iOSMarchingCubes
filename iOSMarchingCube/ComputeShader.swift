@@ -35,7 +35,7 @@ class ComputeShader{
         }        
         let threadSize = 8
         let threadGroupSize = MTLSize(width: threadSize, height: threadSize, depth: threadSize)
-        let gridSize = MTLSize(width: (grid.gridSize + threadSize-1) / threadSize, height: (grid.gridSize + threadSize-1) / threadSize, depth: (grid.gridSize + threadSize-1) / threadSize)
+        let gridSize = MTLSize(width: (grid.dimensions.x + threadSize-1) / threadSize, height: (grid.dimensions.y + threadSize-1) / threadSize, depth: (grid.dimensions.z + threadSize-1) / threadSize)
         
         commandEncoder?.dispatchThreadgroups(gridSize, threadsPerThreadgroup: threadGroupSize)
         commandEncoder?.endEncoding()
