@@ -31,8 +31,8 @@ class Grid{
         points = (0..<self.gridSize).flatMap{z in
             (0..<self.gridSize).flatMap{y in
                 (0..<self.gridSize).map{x in
-//                    let pos = corner.min + SIMD3<Float>(scale.x*Float(x),scale.y*Float(y),scale.z*Float(z))
-                    let pos = corner.min + SIMD3<Float>(Float(x),Float(y),Float(z))
+                    let pos = corner.min + SIMD3<Float>(scale.x*Float(x),scale.y*Float(y),scale.z*Float(z))
+//                    let pos = corner.min + SIMD3<Float>(Float(x),Float(y),Float(z))
                     return TableVertex(pos: pos, normal: SIMD3<Float>.zero, color: SIMD4<Float>.zero, weight: 0)
                 }
             }

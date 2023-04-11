@@ -25,6 +25,7 @@ struct ModelPoint:EaglePointProtocol,BunnyPointProtocol,GridInput{
 }
 class ViewController: UIViewController {
     var grid:Grid?
+    let renderer = Renderer()
     func compute(){
         let model = SwiftStanfordBunny<ModelPoint>.instance()
         let points = try! model.load()
@@ -34,65 +35,14 @@ class ViewController: UIViewController {
             try! computeShader.run(grid: grid)
         }
     }
-    var cameraNode: SCNNode!
-    var modelNode: SCNNode!
-    var sceneView:SCNView?
     func setup(asset:MDLAsset){
-        sceneView = SCNView(frame: view.frame)
-        if let sceneView = sceneView{
-            view.addSubview(sceneView)
-            let scene = SCNScene(mdlAsset: asset)
-            sceneView.scene = scene
-            
-            cameraNode = SCNNode()
-            let camera = SCNCamera()
-            cameraNode.camera = camera
-            cameraNode.position = SCNVector3(x: 0, y: 0, z: 10)
-            scene.rootNode.addChildNode(cameraNode)
-            
-            let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(handlePinch(_:)))
-            sceneView.addGestureRecognizer(pinchGesture)
-//            let rotationGesture = UIRotationGestureRecognizer(target: self, action: #selector(handleRotation(_:)))
-//            sceneView.addGestureRecognizer(rotationGesture)
-            let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
-            sceneView.addGestureRecognizer(panGesture)
-            
-            let lightNode = SCNNode()
-            lightNode.light = SCNLight()
-            lightNode.light?.type = .omni
-            lightNode.position = SCNVector3(x: 0, y: 5, z: 5)
-            scene.rootNode.addChildNode(lightNode)
-            
-            
-            modelNode = scene.rootNode.childNode(withName: "model", recursively: true)!
-//            // ボックスを作成する
-            let box = SCNBox(width: 1.0, height: 1.0, length: 1.0, chamferRadius: 0.0)
-            let material = SCNMaterial()
-            material.diffuse.contents = UIColor.red
-            box.materials = [material]
-            let boxNode = SCNNode(geometry: box)
-            scene.rootNode.addChildNode(boxNode)
-        }
-    }
-    @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
-        let scale = Float(gesture.scale)
-        cameraNode.position.z /= scale
-        gesture.scale = 1
-    }
-    @objc func handleRotation(_ gesture: UIRotationGestureRecognizer) {
-        let angle = Float(gesture.rotation)
-        cameraNode.eulerAngles.y -= angle
-        gesture.rotation = 0
-    }
-    @objc func handlePan(_ gestureRecognizer: UIPanGestureRecognizer) {
-        let translation = gestureRecognizer.translation(in: gestureRecognizer.view!)
-        modelNode.eulerAngles.y +=  Float(translation.x) * .pi / 360
-        modelNode.eulerAngles.x +=  Float(translation.y) * .pi / 360
-        gestureRecognizer.setTranslation(CGPoint.zero, in: sceneView)
+        let sceneView = SCNView(frame: view.frame)
+        view.addSubview(sceneView)
+        renderer.render(sceneView: sceneView, asset: asset)
     }
     @objc func exportAsset(sender:Any) {
         if let grid = grid{
-//            let fileName = "marchingCube.usda"
+            //            let fileName = "marchingCube.usda"
             let fileName = "marchingCube.obj"
             let filePath = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fileName)
             try! grid.asset?.export(to: filePath)
@@ -103,7 +53,7 @@ class ViewController: UIViewController {
                 UIActivity.ActivityType.postToFacebook,
                 UIActivity.ActivityType.postToTwitter,
                 UIActivity.ActivityType.message,
-                //                UIActivity.ActivityType.saveToCameraRoll,
+                UIActivity.ActivityType.saveToCameraRoll,
                 UIActivity.ActivityType.print
             ]
             activityVC.excludedActivityTypes = excludedActivityTypes
