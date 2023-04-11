@@ -18,7 +18,6 @@
 		09C0CF9129E3242100CA2762 /* SwiftStanfordBunny in Frameworks */ = {isa = PBXBuildFile; productRef = 09C0CF9029E3242100CA2762 /* SwiftStanfordBunny */; };
 		09C0CF9329E3247000CA2762 /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09C0CF9229E3247000CA2762 /* Grid.swift */; };
 		09C0CF9529E44DA000CA2762 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09C0CF9429E44DA000CA2762 /* Renderer.swift */; };
-		09C0CF9829E48C7200CA2762 /* SwiftEaglePly in Frameworks */ = {isa = PBXBuildFile; productRef = 09C0CF9729E48C7200CA2762 /* SwiftEaglePly */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,7 +43,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				09C0CF9129E3242100CA2762 /* SwiftStanfordBunny in Frameworks */,
-				09C0CF9829E48C7200CA2762 /* SwiftEaglePly in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -105,7 +103,6 @@
 			name = iOSMarchingCube;
 			packageProductDependencies = (
 				09C0CF9029E3242100CA2762 /* SwiftStanfordBunny */,
-				09C0CF9729E48C7200CA2762 /* SwiftEaglePly */,
 			);
 			productName = iOSMarchingCube;
 			productReference = 09C0CF6D29E2F68300CA2762 /* iOSMarchingCube.app */;
@@ -138,7 +135,6 @@
 			mainGroup = 09C0CF6429E2F68300CA2762;
 			packageReferences = (
 				09C0CF8F29E3242100CA2762 /* XCRemoteSwiftPackageReference "SwiftStanfordBunny" */,
-				09C0CF9629E48C7200CA2762 /* XCRemoteSwiftPackageReference "SwiftEaglePly" */,
 			);
 			productRefGroup = 09C0CF6E29E2F68300CA2762 /* Products */;
 			projectDirPath = "";
@@ -406,14 +402,6 @@
 				kind = branch;
 			};
 		};
-		09C0CF9629E48C7200CA2762 /* XCRemoteSwiftPackageReference "SwiftEaglePly" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/tatsuya-ogawa/SwiftEaglePly.git";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -421,11 +409,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 09C0CF8F29E3242100CA2762 /* XCRemoteSwiftPackageReference "SwiftStanfordBunny" */;
 			productName = SwiftStanfordBunny;
-		};
-		09C0CF9729E48C7200CA2762 /* SwiftEaglePly */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 09C0CF9629E48C7200CA2762 /* XCRemoteSwiftPackageReference "SwiftEaglePly" */;
-			productName = SwiftEaglePly;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

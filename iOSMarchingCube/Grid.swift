@@ -17,12 +17,13 @@ public protocol GridInput{
 class Grid{
     let maxVertexPerGrid = 12
     let dimensions:SIMD3<Int>
-    let isoValue:Float = 0.4
+    let isoValue:Float
     var points:[TableVertex] = []
     var scale:SIMD3<Float> = SIMD3<Float>.zero
     var corner:(min:SIMD3<Float>,max:SIMD3<Float>) = (min:SIMD3<Float>(Float.greatestFiniteMagnitude,Float.greatestFiniteMagnitude,Float.greatestFiniteMagnitude),max:SIMD3<Float>(Float.leastNormalMagnitude,Float.leastNormalMagnitude,Float.leastNormalMagnitude))
-    init(inputs:[GridInput],dimensions:SIMD3<Int>){
+    init(inputs:[GridInput],dimensions:SIMD3<Int>,isoValue:Float = 0.4){
         self.dimensions = dimensions
+        self.isoValue = isoValue
         corner = inputs.reduce(corner){ (tuple,item) in
             let min = SIMD3<Float>(min(item.pos.x,tuple.min.x),min(item.pos.y,tuple.min.y),min(item.pos.z,tuple.min.z))
             let max = SIMD3<Float>(max(item.pos.x,tuple.max.x),max(item.pos.y,tuple.max.y),max(item.pos.z,tuple.max.z))
@@ -33,10 +34,6 @@ class Grid{
             (0..<self.dimensions.y).flatMap{y in
                 (0..<self.dimensions.x).map{x in
                     let pos = corner.min + SIMD3<Float>(scale.x*Float(x),scale.y*Float(y),scale.z*Float(z))
-                    //                    let weight:Float = x == 0 || x == dimensions.x - 1
-                    //                    || y == 0 || y == dimensions.x - 1
-                    //                    || z == 0 || z == dimensions.z - 1
-                    //                    ? 0 : 1
                     return TableVertex(pos: pos, normal: SIMD3<Float>.zero, color: SIMD4<Float>.zero, weight: 0)
                 }
             }
@@ -51,11 +48,12 @@ class Grid{
                         let z:Int = Int(gridOffset.z)+i
                         if 0..<dimensions.x ~= x && 0..<dimensions.y ~= y && 0..<dimensions.z ~= z  {
                             let indice = x + y*dimensions.x + z*dimensions.x*dimensions.y
+                            // grid space distance
                             let distance=simd_distance(input.pos/scale,points[indice].pos/scale+SIMD3<Float>(Float(k),Float(j),Float(i))) / sqrtf(3)
                             if points[indice].weight < 1-distance {
                                 points[indice].weight = 1-distance
                                 points[indice].normal = input.normal
-                                points[indice].color = SIMD4<Float>(1,0,0,1)
+                                points[indice].color = SIMD4<Float>(0,0,1,1)
                             }
                         }
                     }

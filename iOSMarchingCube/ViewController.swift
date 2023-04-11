@@ -9,11 +9,10 @@ import UIKit
 import SceneKit
 import ModelIO
 import SceneKit.ModelIO
-import SwiftEaglePly
 import SwiftStanfordBunny
 import MetalKit
 
-struct ModelPoint:EaglePointProtocol,BunnyPointProtocol,GridInput{
+struct ModelPoint:BunnyPointProtocol,GridInput{
     var pos: SIMD3<Float>
     var normal: SIMD3<Float>
     var color: SIMD4<UInt8>
