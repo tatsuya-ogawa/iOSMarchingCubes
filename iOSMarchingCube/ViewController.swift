@@ -15,11 +15,11 @@ import MetalKit
 struct ModelPoint:BunnyPointProtocol,GridInput{
     var pos: SIMD3<Float>
     var normal: SIMD3<Float>
-    var color: SIMD4<UInt8>
-    init(pos: SIMD3<Float>, normal: SIMD3<Float>, color: SIMD4<UInt8>) {
+    var color: SIMD4<Float>
+    init(pos: SIMD3<Float>, normal: SIMD3<Float>,uv: SIMD2<Float>) {
         self.pos = pos
         self.normal = normal
-        self.color = color
+        self.color = SIMD4<Float>(0,0,1,1)
     }
 }
 class ViewController: UIViewController {
@@ -27,7 +27,7 @@ class ViewController: UIViewController {
     let renderer = Renderer()
     func compute(){
         let model = SwiftStanfordBunny<ModelPoint>.instance()
-        let points = try! model.load()
+        let (points,_) = try! model.load()
         grid = Grid(inputs:points,dimensions: SIMD3<Int>(50,50,50))
         if let grid = grid{
             let computeShader = ComputeShader()

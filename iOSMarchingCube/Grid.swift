@@ -12,7 +12,7 @@ import ModelIO
 public protocol GridInput{
     var pos:SIMD3<Float> { get set }
     var normal:SIMD3<Float>{ get set }
-    var color: SIMD4<UInt8>{ get set }
+    var color: SIMD4<Float>{ get set }
 }
 class Grid{
     let maxVertexPerGrid = 12
@@ -53,7 +53,7 @@ class Grid{
                             if points[indice].weight < 1-distance {
                                 points[indice].weight = 1-distance
                                 points[indice].normal = input.normal
-                                points[indice].color = SIMD4<Float>(0,0,1,1)
+                                points[indice].color = input.color
                             }
                         }
                     }
